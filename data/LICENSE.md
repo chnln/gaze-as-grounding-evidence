@@ -16,6 +16,6 @@ and Massimo Poesio. Original materials retain their attribution:
 - MUNDEX annotations: © 2025 Hendrik Buschmeier, Angela Grimminger, Petra Wagner,
   Stefan Lazarov, Olcay Türk and Yu Wang.
 
-The [data guide](README.md#sources-and-attribution) identifies the source releases
+The [README](../README.md#sources-and-attribution) identifies the source releases
 and the transformations applied. This package contains derived tables, not the
 original recordings or source annotation archives.
