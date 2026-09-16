@@ -1,0 +1,21 @@
+{
+  "dataset_version": "MINT 2026 camera-ready feature tables",
+  "files": [
+    {
+      "path": "data/feature_schema.json",
+      "sha256": "13049437f54f42b79d20da2c88b9f6b787f910547a47bae297d300626047ed0a"
+    },
+    {
+      "path": "data/maptask_reference_gaze_features.csv",
+      "sha256": "45f6eda2a45b3b3a1891d25fe32126c5f49f304cf25bd3a6442c9b524886ddb6",
+      "rows": 5144,
+      "columns": 96
+    },
+    {
+      "path": "data/mundex_understanding_gaze_features.csv",
+      "sha256": "08409c3e3590a6f1177250f5e391a2741a14fd03fd923bde00091c1b6521dd3f",
+      "rows": 807,
+      "columns": 94
+    }
+  ]
+}

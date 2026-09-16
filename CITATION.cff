@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use these processed gaze features or analysis code, please cite the accompanying paper and upstream datasets."
+title: "Gaze as Evidence for Common Grounding: A Cross-Corpus Analysis of MapTask and MUNDEX"
+version: "0.1.0"
+repository-code: "https://github.com/chnln/gaze-as-grounding-evidence"
+authors:
+  - family-names: Li
+    given-names: Nan
+  - family-names: Gatt
+    given-names: Albert
+  - family-names: Poesio
+    given-names: Massimo
+preferred-citation:
+  type: conference-paper
+  title: "Gaze as Evidence for Common Grounding: A Cross-Corpus Analysis of MapTask and MUNDEX"
+  authors:
+    - family-names: Li
+      given-names: Nan
+    - family-names: Gatt
+      given-names: Albert
+    - family-names: Poesio
+      given-names: Massimo
+  year: 2026
+  collection-title: "MINT 2026"

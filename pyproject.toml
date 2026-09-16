@@ -1,0 +1,13 @@
+[project]
+name = "gaze-as-grounding-evidence"
+version = "0.1.0"
+description = "Processed gaze features and cross-corpus grounding analyses"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy==2.4.6",
+    "pandas==3.0.3",
+    "scipy==1.17.1",
+    "scikit-learn==1.8.0",
+    "statsmodels==0.14.6",
+]
