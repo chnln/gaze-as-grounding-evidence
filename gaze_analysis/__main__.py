@@ -10,6 +10,7 @@ import pandas as pd
 
 from . import chains as c
 from . import statistics as s
+from . import sensitivity
 
 ROOT = Path(__file__).resolve().parents[1]
 FILENAMES = {
@@ -107,7 +108,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", type=Path, default=ROOT / "data")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "results")
-    parser.add_argument("--analysis", choices=["all", "associations", "prediction", "chains"], default="all")
+    parser.add_argument("--analysis", choices=["all", "associations", "prediction", "chains", "sensitivity"], default="all")
     args = parser.parse_args()
     if args.output_dir.resolve() == args.data_dir.resolve():
         parser.error("Choose an output directory separate from data.")
@@ -116,6 +117,8 @@ def main() -> None:
     # Preserve that convention for ties in rank/paired tests; primary calculations
     # use round-trip parsing to recover the extracted floating-point values.
     followup = load_tables(args.data_dir, round_trip=False)
+    components = (sensitivity.load_components(args.data_dir, followup["maptask"])
+                  if args.analysis in {"all", "sensitivity"} else None)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     for corpus, groups in [("maptask", ["status", "condition", "speaker"]),
                            ("mundex", ["status", "annotator_role", "explainer_id"])]:
@@ -131,6 +134,8 @@ def main() -> None:
         prediction(primary, args.output_dir, report)
     if args.analysis in {"all", "chains"}:
         reference_chains(followup["maptask"], args.output_dir, report)
+    if args.analysis in {"all", "sensitivity"}:
+        sensitivity.run(primary, followup, components, args.output_dir / "sensitivity", report)
     (args.output_dir / "summary.md").write_text("\n".join(report) + "\n")
     print(f"Results written to {args.output_dir.resolve()}")
 

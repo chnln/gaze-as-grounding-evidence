@@ -16,6 +16,15 @@
       "sha256": "08409c3e3590a6f1177250f5e391a2741a14fd03fd923bde00091c1b6521dd3f",
       "rows": 807,
       "columns": 94
+    },
+    {
+      "path": "data/maptask_participant_components.csv",
+      "sha256": "95d4928478a23db17b9aaeae44252221ed899c6ae01bd14219e8d37d4eb9e046",
+      "rows": 46,
+      "columns": 2,
+      "source": "HCRC Map Task NXT 2.1: corpus-resources/maptask-corpus.xml",
+      "source_sha256": "00dfe3c0d68bad6a2e3d1c13fe3674d27b15a3b36f98604837b5c158f921a88b",
+      "definition": "Connected components among the 46 analyzed dialogues: two dialogues are connected when they share a participant. Each component is named by its alphabetically first dialogue."
     }
   ]
 }

@@ -16,9 +16,12 @@ These are the feature tables used in the paper. They contain window-level gaze
 measurements and annotation metadata derived from gaze annotations, not raw
 eye-tracker samples or complete gaze-event tracks. [Column descriptions](data/feature_schema.json)
 cover every column; [file hashes](data/manifest.json) identify this data version.
+The [participant-component mapping](data/maptask_participant_components.csv)
+supplies the six groups of MapTask dialogues connected by shared participants.
 
 - [Run the analyses](#run-the-analyses)
 - [Analyses and outputs](#analyses-and-outputs)
+- [Sensitivity analyses and reproduction coverage](#sensitivity-analyses-and-reproduction-coverage)
 - [Data and measurement definitions](#data-and-measurement-definitions)
 - [Implementation and numerical conventions](#implementation-and-numerical-conventions)
 - [Sources and attribution](#sources-and-attribution)
@@ -35,8 +38,10 @@ uv sync --locked
 uv run python -m gaze_analysis
 ```
 
-The command uses only the files in this repository. It writes 21 CSVs and a
-readable `summary.md` under `results/`, which is excluded from Git. Use another
+The command uses only the files in this repository. It writes 21 primary CSVs,
+18 supplementary CSVs under `results/sensitivity/`, and a readable `summary.md`
+under `results/`, which is excluded from Git. The default `all` selection includes
+the resampling analyses and takes longer than an individual group. Use another
 output directory or run one group of analyses with:
 
 ```bash
@@ -44,12 +49,16 @@ uv run python -m gaze_analysis --output-dir results/my-run
 uv run python -m gaze_analysis --analysis associations
 uv run python -m gaze_analysis --analysis prediction
 uv run python -m gaze_analysis --analysis chains
+uv run python -m gaze_analysis --analysis sensitivity
 ```
 
 Each run replaces its own output files and summary; unrelated results from a
 previous analysis selection remain. Use separate output directories to retain
 multiple runs. `--data-dir` accepts another directory containing the same table
 filenames and schema.
+The `all` and `sensitivity` selections also require
+`maptask_participant_components.csv` in that directory, covering exactly its
+MapTask dialogues.
 
 ## Analyses and outputs
 
@@ -79,6 +88,65 @@ chain analysis identifies **189 same-speaker pairs in 45 dialogues**. Effects
 and predictive gains are modest; the paper discusses sensitivity to inference
 units, repeated participants and annotation perspectives.
 
+## Sensitivity analyses and reproduction coverage
+
+`--analysis sensitivity` recomputes the following comparisons from the released
+features and participant-component mapping. It also writes the two corpus count
+tables and a summary. All supplementary CSVs go under `results/sensitivity/`.
+
+| Paper analysis | Output files in `sensitivity/` |
+| --- | --- |
+| Default and 30 reshuffled grouped partitions; Results, Appendix G | `cv_partitions.csv`, `cv_partition_summary.csv` |
+| Alternative GEE clusters and covariance corrections; Results, Appendix E, Limitations | `gee_clustering.csv` |
+| Chain tests after averaging within dialogues/groups, cluster-bootstrap intervals, and per-group changes; Results, Appendix F | `chain_clustering.csv`, `chain_by_component.csv` |
+| Two duplicate-window policies; Appendix A.1 | `duplicate_windows_summary.csv`, `duplicate_windows_association.csv`, `duplicate_windows_prediction.csv`, `duplicate_windows_chains.csv` |
+| Pooled, EX-only and EE-only prediction; Results, Appendix A.3 | `mundex_perspective_counts.csv`, `mundex_perspective_prediction.csv` |
+| Role and eye-contact interaction tests; Results, Discussion, Appendix D | `maptask_role_interaction_gee.csv`, `mundex_role_interaction_gee.csv`, `maptask_condition_interaction_gee.csv` |
+| Giver subsampling to the follower sample size; Appendix D | `maptask_role_power_check.csv` |
+| Mixed-speaker chain comparison; Appendix F | `chain_mixed_speaker_results.csv` |
+| Same-speaker changes, standardized effects and dialogue-bootstrap intervals; Figure 2, Appendix F | `resolution_pair_changes.csv`, `resolution_paired_effects.csv` |
+
+The comparisons preserve the paper's settings:
+
+- **Grouped partitions:** the default GroupKFold plus 30 shuffled partitions
+  with seeds 0–29, using 10 dialogue folds for MapTask and 5 explainer folds for
+  MUNDEX. The summary's mean, SD and range exclude the default partition.
+- **GEE:** one standardized feature per model, exchangeable correlation,
+  conventional robust and bias-reduced covariance estimates. BH correction is
+  applied separately within each corpus/cluster/covariance combination.
+- **Chain inference:** 800 cluster-bootstrap replicates with seed 4200, drawing
+  whole dialogues or participant components with replacement. The effect is
+  the pair-weighted mean change divided by its sample SD. Wilcoxon tests on
+  unit means are separate from pair-level tests; BH correction covers the
+  eight chain features within each inference unit. Component labels represent
+  connected groups of dialogues, not individual participants.
+- **Duplicate windows:** group by dialogue, speaker and RE start/end. Retain one
+  row with the non-aligned label if any concept is non-aligned, or exclude
+  conflicting windows and retain one row per remaining window. In
+  `duplicate_windows_association.csv`, `p_value` is the unadjusted Mann–Whitney
+  p-value and `q_value` is the dialogue-clustered GEE BH q-value.
+- **Role subsampling:** 1,000 draws with seed 42, using unadjusted p < .05.
+  This row-level rejection-rate check does not preserve dialogue clusters;
+  the formal interaction tests are reported separately.
+
+These commands cover the listed analyses; the following require information
+absent from the two fixed feature tables and are **not reproduced by this package**:
+
+| Analysis | Additional inputs and processing required |
+| --- | --- |
+| MUNDEX linked annotations (271 rows, 44 conflicting pairs, 672-row variants); Appendix A.3, Limitations | Original ELAN `UND_MATCH` spans and EX/EE annotations to reconstruct links; alternatively, a separately released derived link mapping would enable downstream statistics |
+| Earlier-event temporal/bigram overlap policy; Appendix A.4 | Original gaze events to re-extract the alternative features; alternatively, an additional feature table for that policy |
+| Alternative window lengths; Appendix A.4 | Original gaze/timing/target annotations to rebuild and coverage-filter each window; alternatively, additional feature tables for each setting |
+| Counts before coverage filtering and attribution of excluded windows; Appendix A, Limitations | Source annotations, including the windows excluded from the released tables |
+| Figure 1's event timeline | Source gaze-event and reference-expression timing annotations |
+
+The [source releases](#sources-and-attribution) provide the annotations. The
+current package includes neither a raw-annotation extraction pipeline nor these
+alternative derived inputs. Running its analyses therefore does not constitute
+an end-to-end reconstruction from the source corpora. Figure 2's numerical
+inputs and confidence intervals are recomputed; figure-rendering code is not
+included.
+
 ## Data and measurement definitions
 
 ### Observations, labels, and roles
@@ -91,6 +159,15 @@ units, repeated participants and annotation perspectives.
 Multiple landmarks in one MapTask expression can produce identical gaze windows:
 54 rows across 26 windows, four of which have conflicting binary labels. Concept-level rows are retained. The paper reports
 both duplicate-window sensitivity variants in Appendix A.1.
+
+The participant-component mapping has 46 rows and two columns: `dialogue_id`
+and `component`. It is derived from `corpus-resources/maptask-corpus.xml` in the
+HCRC NXT 2.1 release. Among the 46 analyzed dialogues, connect two dialogues
+when they share a participant, then take the transitive connected components.
+Each of the six components is named by its alphabetically first dialogue.
+The file contains dialogue/component identifiers only; the manifest records
+the source-register hash and derivation. Its grouping is distinct from both
+the 46 dialogue clusters used for GEE and the 45 dialogues with resolution pairs.
 
 In MUNDEX, `annotator_role` identifies whose judgment supplied the target; it does
 not change the meaning of `ex_`/`ee_` gaze columns.
@@ -184,26 +261,34 @@ independent event-level consensus labels.
   reference-chain construction and comparisons.
 - [Command-line runner](gaze_analysis/__main__.py): load the released data and
   write results.
+- [sensitivity.py](gaze_analysis/sensitivity.py): alternative inference units,
+  resampling, duplicate-window policies, moderator tests and perspective-specific
+  prediction. Bootstrap and pair-construction helpers are in `chains.py`.
 
-The functions retain the paper's analysis definitions. Main associations and
-prediction use round-trip CSV parsing. Role/condition, GEE and chain analyses
-retain the original follow-up workflow's default Pandas parsing, which can
-matter for ties in rank and paired tests. On Python 3.12 with the locked
-packages, all shared fields in the 21 outputs matched the original analysis
-references exactly. The public association tables additionally expose BH
-q-values; unpublished RF rows are omitted.
+The functions retain the paper's analysis definitions. Main associations,
+prediction and MUNDEX perspective-specific prediction use round-trip CSV
+parsing. Role/condition, GEE, chain and the remaining sensitivity analyses retain
+their original workflows' default Pandas parsing. This can affect ties in rank
+and paired tests, and occasionally a fitted prediction. For example, MapTask
+structured+temporal macro-F1 is .531734 in the primary analysis and .531822 in
+the sensitivity workflow's default partition; both round to the reported .532.
+Sensitivity gains are calculated against controls in the same workflow.
+The public association tables additionally expose BH q-values; unpublished RF
+rows are omitted.
 
-This package analyzes the fixed distributed windows. Re-extracting alternative
-windows, raw-event timelines and overlap variants requires the original corpus
-annotations. Participant-component and annotation-link sensitivity workflows
-are outside this package. CR manuscript checking, historical audits and raw
-corpora are not required to run the analyses listed above.
+Validation on Python 3.12 with the locked environment reproduced every field
+of all 18 supplementary tables exactly. All shared fields of the 21 primary
+tables also matched their development references, including unrounded scores.
+
+CR manuscript checking and historical audit reports are not part of this
+package. The [coverage table](#sensitivity-analyses-and-reproduction-coverage)
+distinguishes the included statistical analyses from source-annotation workflows.
 
 ## Sources and attribution
 
 | Source | Materials used | Version and source |
 | --- | --- | --- |
-| HCRC Map Task Corpus; Human Communication Research Centre, University of Edinburgh and University of Glasgow | Gaze, timing and landmark-reference annotations | [NXT annotations 2.1](https://groups.inf.ed.ac.uk/maptask/maptasknxt.html) |
+| HCRC Map Task Corpus; Human Communication Research Centre, University of Edinburgh and University of Glasgow | Gaze, timing, landmark-reference annotations and the dialogue-participant register | [NXT annotations 2.1](https://groups.inf.ed.ac.uk/maptask/maptasknxt.html) |
 | Grounded Misunderstandings in MapTask (GMMT); Nan Li, Albert Gatt and Massimo Poesio | Perspectivist grounding labels | [GMMT repository](https://github.com/chnln/grounded-misunderstandings-in-maptask) |
 | MUNDEX Annotations; Hendrik Buschmeier, Angela Grimminger, Petra Wagner, Stefan Lazarov, Olcay Türk and Yu Wang | Gaze and retrospective understanding annotations | [Version 0.7, Zenodo](https://doi.org/10.5281/zenodo.17129817) |
 

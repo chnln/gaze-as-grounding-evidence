@@ -1,6 +1,7 @@
 # Data license and attribution
 
-The processed feature tables, schema and data documentation are made available
+The processed feature tables, participant-component mapping, schema and data
+documentation are made available
 under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
 The [legal code](https://creativecommons.org/licenses/by/4.0/legalcode) sets out
 the complete terms. Give appropriate credit, link to the license and indicate

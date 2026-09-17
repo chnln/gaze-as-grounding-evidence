@@ -232,3 +232,67 @@ def resolution_transition_tests(
         )
     result = pd.DataFrame(rows).sort_values("p_value")
     return bh_adjust_within(result)
+
+
+
+def build_resolution_pairs(chains: pd.DataFrame, *, require_same_speaker: bool = True) -> pd.DataFrame:
+    features = [
+        "spk_prop_task",
+        "spk_prop_partner",
+        "spk_entropy",
+        "spk_transitions",
+        "addr_prop_task",
+        "addr_prop_partner",
+        "addr_entropy",
+        "mutual_gaze",
+    ]
+    rows = []
+    for pre, post in resolution_pair_rows(chains, require_same_speaker=require_same_speaker):
+        row: dict[str, object] = {
+            "dialogue_id": pre["dialogue_id"],
+            "concept_id": pre["concept_id"],
+            "pre_reference_id": pre["reference_id"],
+            "post_reference_id": post["reference_id"],
+        }
+        for feature in features:
+            row[f"pre_{feature}"] = pre[feature]
+            row[f"post_{feature}"] = post[feature]
+            row[f"diff_{feature}"] = post[feature] - pre[feature]
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def bootstrap_paired_effects(pairs: pd.DataFrame, n_boot: int) -> pd.DataFrame:
+    features = [col.removeprefix("diff_") for col in pairs.columns if col.startswith("diff_")]
+    groups = {name: idx.to_numpy() for name, idx in pairs.groupby("dialogue_id").groups.items()}
+    keys = np.array(list(groups), dtype=object)
+    rng = np.random.default_rng(4200)
+    rows = []
+    for feature in features:
+        diff = pairs[f"diff_{feature}"].to_numpy()
+        point = float(diff.mean() / diff.std(ddof=1))
+        boot = []
+        for _ in range(n_boot):
+            selected = rng.choice(keys, size=len(keys), replace=True)
+            index = np.concatenate([groups[key] for key in selected])
+            values = pairs.loc[index, f"diff_{feature}"].to_numpy()
+            sd = values.std(ddof=1)
+            if sd > 0:
+                boot.append(float(values.mean() / sd))
+        low, high = np.quantile(boot, [0.025, 0.975])
+        p_value = float(stats.wilcoxon(diff).pvalue) if not np.allclose(diff, 0) else 1.0
+        rows.append(
+            {
+                "feature": feature,
+                "standardized_mean_change": point,
+                "ci_low": float(low),
+                "ci_high": float(high),
+                "wilcoxon_p": p_value,
+                "n_pairs": len(diff),
+            }
+        )
+    df = pd.DataFrame(rows)
+    from statsmodels.stats.multitest import multipletests
+    _, q_values, _, _ = multipletests(df["wilcoxon_p"].values, method="fdr_bh")
+    df["wilcoxon_q"] = q_values
+    return df
