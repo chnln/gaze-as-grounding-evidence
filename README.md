@@ -305,9 +305,28 @@ for the data terms and retained copyright attribution.
 
 ## Citation and licenses
 
-Please cite the paper and the upstream datasets; source references are listed
-[above](#sources-and-attribution). Machine-readable authorship is provided in
-[CITATION.cff](CITATION.cff).
-
 Code: [MIT](LICENSE). Processed data and data documentation:
 [CC BY 4.0](data/LICENSE.md), with the upstream attribution notices retained.
+
+### How to cite
+
+If you use these data or analyses, please cite our
+[paper on arXiv](https://arxiv.org/abs/2609.18011v1) and the
+[upstream datasets](#sources-and-attribution). The paper's DOI is
+[10.48550/arXiv.2609.18011](https://doi.org/10.48550/arXiv.2609.18011).
+
+```bibtex
+@misc{li2026gaze,
+  title         = {Gaze as Evidence for Common Grounding: A Cross-Corpus Analysis of {MapTask} and {MUNDEX}},
+  author        = {Nan Li and Albert Gatt and Massimo Poesio},
+  year          = {2026},
+  eprint        = {2609.18011},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  doi           = {10.48550/arXiv.2609.18011},
+  url           = {https://arxiv.org/abs/2609.18011v1}
+}
+```
+
+[CITATION.cff](CITATION.cff) provides the same preferred citation for GitHub's
+**Cite this repository** feature.

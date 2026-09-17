@@ -11,7 +11,7 @@ authors:
   - family-names: Poesio
     given-names: Massimo
 preferred-citation:
-  type: conference-paper
+  type: article
   title: "Gaze as Evidence for Common Grounding: A Cross-Corpus Analysis of MapTask and MUNDEX"
   authors:
     - family-names: Li
@@ -21,4 +21,6 @@ preferred-citation:
     - family-names: Poesio
       given-names: Massimo
   year: 2026
-  collection-title: "MINT 2026"
+  journal: "arXiv"
+  doi: "10.48550/arXiv.2609.18011"
+  url: "https://arxiv.org/abs/2609.18011v1"
