@@ -5,6 +5,10 @@ Grounding: A Cross-Corpus Analysis of MapTask and MUNDEX**.
 
 Nan Li, Albert Gatt and Massimo Poesio · MINT 2026.
 
+**[Paper on arXiv](https://arxiv.org/abs/2609.18011v1)** ·
+**[HF paper page](https://huggingface.co/papers/2609.18011)** ·
+**[HF dataset](https://huggingface.co/datasets/chnln/gaze-as-grounding-evidence)**
+
 ## Data
 
 | Corpus | File | Rows × columns | Observation |
@@ -26,6 +30,21 @@ supplies the six groups of MapTask dialogues connected by shared participants.
 - [Implementation and numerical conventions](#implementation-and-numerical-conventions)
 - [Sources and attribution](#sources-and-attribution)
 - [Citation and licenses](#citation-and-licenses)
+
+### Browse on Hugging Face
+
+The [HF dataset](https://huggingface.co/datasets/chnln/gaze-as-grounding-evidence)
+provides separate `maptask` and `mundex` configurations, an interactive table
+viewer, and real-row examples. Its `v0.1.0` tag preserves the feature CSVs, schema,
+participant mapping and manifest from [this repository’s `v0.1.0` release](https://github.com/chnln/gaze-as-grounding-evidence/tree/v0.1.0)
+byte for byte. Each configuration has one `train` split containing the full
+dataset; it does not define a train/test benchmark. The data card includes
+version-pinned `load_dataset` examples and links back to this analysis package
+and the [HF paper page](https://huggingface.co/papers/2609.18011).
+
+This repository remains the maintained source for released data and analysis
+code. Use the locked workflow below for numerical reproduction; data changes
+are synchronized to HF from an identified GitHub release.
 
 ## Run the analyses
 

@@ -3,6 +3,7 @@ message: "If you use these processed gaze features or analysis code, please cite
 title: "Gaze as Evidence for Common Grounding: A Cross-Corpus Analysis of MapTask and MUNDEX"
 version: "0.1.0"
 repository-code: "https://github.com/chnln/gaze-as-grounding-evidence"
+repository-artifact: "https://huggingface.co/datasets/chnln/gaze-as-grounding-evidence"
 authors:
   - family-names: Li
     given-names: Nan
